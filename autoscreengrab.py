@@ -1,47 +1,48 @@
 import tkinter as tk
 
-HEIGHT = 300
-WIDTH = 400
+class mainWindow:
+    def __init__(self, main):
+        HEIGHT = 300
+        WIDTH = 400
+        self.canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
+        self.canvas.pack()
+        #? Folder select
+        self.frameFolderSelect = tk.Frame(root)
+        self.frameFolderSelect.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.2, anchor='n')
+        self.lblFolderSelect = tk.Label(self.frameFolderSelect, text='Save Location')
+        self.lblFolderSelect.place(relx=0, rely=0, relwidth=0.25, relheight=0.25, anchor='nw')
+        self.entryFolderSelect = tk.Entry(self.frameFolderSelect, )
+        self.entryFolderSelect.place(relx=0, rely=0.5, relwidth=0.7, relheight=0.5, anchor='w')
+        self.btnFolderSelect = tk.Button(self.frameFolderSelect, text='browse')
+        self.btnFolderSelect.place(relx=0.75, rely=0.5, relwidth=0.25, relheight=0.5, anchor='w')
 
-root = tk.Tk()
+        #? Interval
+        self.frameInterval = tk.Frame(root)
+        self.frameInterval.place(relx=0.5, rely=0.3, relwidth=0.9, relheight=0.2, anchor='n')
+        self.lblInterval = tk.Label(self.frameInterval, text='Interval')
+        self.lblInterval.place(relx=0, rely=0, relwidth=0.15, relheight=0.25, anchor='nw')
+        self.entryInterval = tk.Entry(self.frameInterval, justify='center')
+        self.entryInterval.place(relx=0, rely=0.5, relwidth=0.2, relheight=0.5, anchor='w')
+        self.lblMinutes = tk.Label(self.frameInterval, text='minutes')
+        self.lblMinutes.place(relx=0.25, rely=0.5, relwidth=0.15, relheight=0.5, anchor='w')
 
-canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
-canvas.pack()
+        #? Info section
+        self.frameInfo = tk.Frame(root)
+        self.frameInfo.place(relx=0.5, rely=0.6, relwidth=0.9, relheight=0.1, anchor='n')
+        self.lblScreenshotsTaken = tk.Label(self.frameInfo, text=f'Screenshots taken: ')
+        self.lblScreenshotsTaken.place(relx=0.5, rely=0, relwidth=0.8, relheight=0.45, anchor='n')
+        self.lblTimeRunning = tk.Label(self.frameInfo, text=f'Time Running: ')
+        self.lblTimeRunning.place(relx=0.5, rely=0.5, relwidth=0.8, relheight=0.5, anchor='n')
 
-#? Folder select
-frameFolderSelect = tk.Frame(root)
-frameFolderSelect.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.2, anchor='n')
-lblFolderSelect = tk.Label(frameFolderSelect, text='Save Location')
-lblFolderSelect.place(relx=0, rely=0, relwidth=0.25, relheight=0.25, anchor='nw')
-entryFolderSelect = tk.Entry(frameFolderSelect)
-entryFolderSelect.place(relx=0, rely=0.5, relwidth=0.7, relheight=0.5, anchor='w')
-btnFolderSelect = tk.Button(frameFolderSelect, text='browse')
-btnFolderSelect.place(relx=0.75, rely=0.5, relwidth=0.25, relheight=0.5, anchor='w')
+        #? Start/Stop buttons
+        self.frameStartStop = tk.Frame(root)
+        self.frameStartStop.place(relx=0.5, rely=0.75, relwidth=0.9, relheight=0.2, anchor='n')
+        self.btnStart = tk.Button(self.frameStartStop, text='start')
+        self.btnStart.place(relx=0, rely=0.5, relwidth=0.4, relheight=0.5, anchor='w')
+        self.btnStop = tk.Button(self.frameStartStop, text='stop')
+        self.btnStop.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.5, anchor='w')
 
-#? Interval
-frameInterval = tk.Frame(root)
-frameInterval.place(relx=0.5, rely=0.3, relwidth=0.9, relheight=0.2, anchor='n')
-lblInterval = tk.Label(frameInterval, text='Interval')
-lblInterval.place(relx=0, rely=0, relwidth=0.15, relheight=0.25, anchor='nw')
-entryInterval = tk.Entry(frameInterval, justify='center')
-entryInterval.place(relx=0, rely=0.5, relwidth=0.2, relheight=0.5, anchor='w')
-lblMinutes = tk.Label(frameInterval, text='minutes')
-lblMinutes.place(relx=0.25, rely=0.5, relwidth=0.15, relheight=0.5, anchor='w')
-
-#? Info section
-frameInfo = tk.Frame(root)
-frameInfo.place(relx=0.5, rely=0.6, relwidth=0.9, relheight=0.1, anchor='n')
-lblScreenshotsTaken = tk.Label(frameInfo, text=f'Screenshots taken: ')
-lblScreenshotsTaken.place(relx=0.5, rely=0, relwidth=0.8, relheight=0.45, anchor='n')
-lblTimeRunning = tk.Label(frameInfo, text=f'Time Running: ')
-lblTimeRunning.place(relx=0.5, rely=0.5, relwidth=0.8, relheight=0.5, anchor='n')
-
-#? Start/Stop buttons
-frameStartStop = tk.Frame(root)
-frameStartStop.place(relx=0.5, rely=0.75, relwidth=0.9, relheight=0.2, anchor='n')
-btnStart = tk.Button(frameStartStop, text='start')
-btnStart.place(relx=0, rely=0.5, relwidth=0.4, relheight=0.5, anchor='w')
-btnStop = tk.Button(frameStartStop, text='stop')
-btnStop.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.5, anchor='w')
-
-root.mainloop()
+if __name__ == '__main__':
+    root = tk.Tk()
+    mainWindow = mainWindow(root)
+    root.mainloop()
