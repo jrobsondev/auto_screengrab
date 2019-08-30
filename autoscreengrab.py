@@ -1,9 +1,15 @@
 import tkinter as tk
+from tkinter import filedialog
 
 class mainWindow:
     def __init__(self, main):
+        #? Variables
         HEIGHT = 300
         WIDTH = 400
+
+        #! PRESENTATION LAYER !#
+
+        #? Canvas
         self.canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
         self.canvas.pack()
         #? Folder select
@@ -13,7 +19,7 @@ class mainWindow:
         self.lblFolderSelect.place(relx=0, rely=0, relwidth=0.25, relheight=0.25, anchor='nw')
         self.entryFolderSelect = tk.Entry(self.frameFolderSelect, )
         self.entryFolderSelect.place(relx=0, rely=0.5, relwidth=0.7, relheight=0.5, anchor='w')
-        self.btnFolderSelect = tk.Button(self.frameFolderSelect, text='browse')
+        self.btnFolderSelect = tk.Button(self.frameFolderSelect, text='browse', command = self.BtnFolderSelectPressed)
         self.btnFolderSelect.place(relx=0.75, rely=0.5, relwidth=0.25, relheight=0.5, anchor='w')
 
         #? Interval
@@ -41,6 +47,13 @@ class mainWindow:
         self.btnStart.place(relx=0, rely=0.5, relwidth=0.4, relheight=0.5, anchor='w')
         self.btnStop = tk.Button(self.frameStartStop, text='stop')
         self.btnStop.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.5, anchor='w')
+
+        #! BUSINESS LAYER !#
+
+    def BtnFolderSelectPressed(self):
+        file_path = filedialog.askdirectory()
+        self.entryFolderSelect.delete(0, 'end')
+        self.entryFolderSelect.insert(0, file_path)
 
 if __name__ == '__main__':
     root = tk.Tk()
