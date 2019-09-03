@@ -88,14 +88,15 @@ class mainWindow:
         #TODO: open popup window prompting to open screenshot folder
         #? Stop updating screenshots taken
         self.running = False
-        self.root.after_cancel(callback)
+        self.root.after_cancel(self.callback)
 
     def UpdateLblScreenshotsTaken(self, interval):
         if self.running:
             screenshots_taken = int(self.lblScreenshotsTaken.cget('text').split(':')[1].strip())
             screenshots_taken = screenshots_taken + 1
             self.lblScreenshotsTaken.config(text=f'Screenshots taken: {str(screenshots_taken)}')
-            self.root.after(interval*600, lambda: self.UpdateLblScreenshotsTaken(int(self.entryInterval.get())))
+            #! change interval multiplication back to *60000
+            self.callback = self.root.after(interval*600, lambda: self.UpdateLblScreenshotsTaken(int(self.entryInterval.get())))
 
     def TakeScreenshot(self):
         #TODO: The whole bloody lot
