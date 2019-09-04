@@ -9,7 +9,7 @@ class MainWindow:
     HEIGHT = 300
     WIDTH = 400
     running = True
-    callback = None
+    callbacks = []
     screenshotCount = 1
 
     def __init__(self):
@@ -102,7 +102,8 @@ class MainWindow:
         # TODO: open popup window prompting to open screenshot folder
         # ? Stop updating screenshots taken
         self.running = False
-        self.root.after_cancel(self.callback)
+        for callback in self.callbacks:
+            self.root.after_cancel(callback)
         # ? Reset screenshot count back to 1
         self.screenshotCount = 1
 
@@ -112,19 +113,20 @@ class MainWindow:
             screenshots_taken = screenshots_taken + 1
             # ! change interval multiplication back to *60000
             self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(screenshots_taken)}')
-            self.callback = self.root.after(interval * 6000,
-                                            lambda: self.update_lbl_screenshots_taken(int(self.entry_interval.get())))
+            self.callbacks.append(self.root.after(interval * 60000,
+                                                  lambda: self.update_lbl_screenshots_taken(
+                                                      int(self.entry_interval.get()))))
 
     def take_screenshot(self, interval):
         if self.running:
-            screen = getRectAsImage(getDisplayRects()[1])
+            screen = getRectAsImage(getDisplayRects()[0])
             file_path = self.entry_folder_select.get()
             file_name = self.entry_project_name.get() + '_' + str(self.screenshotCount) + '.png'
             screen.save(os.path.join(file_path, file_name), format='png')
             self.screenshotCount += 1
             # ! change interval multiplication back to *60000
-            self.callback = self.root.after(interval * 6000,
-                                            lambda: self.take_screenshot(int(self.entry_interval.get())))
+            self.callbacks.append(self.root.after(interval * 60000,
+                                                  lambda: self.take_screenshot(int(self.entry_interval.get()))))
 
 
 if __name__ == '__main__':
