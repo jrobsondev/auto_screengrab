@@ -151,17 +151,32 @@ class MainWindow:
             return last_file_number
         return None
 
-    def popup(self, title, msg):
+    def popup(self, title, msg, yes_no=False):
+        # TODO: Disable all controls whilst popup is open
         popup = tk.Tk()
         popup.wm_title(title)
-        popup_canvas = tk.Canvas(popup, height='100', width='210')
+
+        popup_canvas = tk.Canvas(popup, height='110', width='250')
         popup_canvas.pack()
-        lbl_popup = tk.Label(popup_canvas, text=msg)
-        lbl_popup.place(relx=0.5, rely=0, relwidth=0.9, relheight=0.5, anchor='n')
-        btn_popup_okay = tk.Button(popup_canvas, text="OK", command = popup.destroy)
-        btn_popup_okay.place(relx=0.5, rely=0.6, relwidth=0.4, relheight=0.3, anchor='n')
+
+        popup_frame_msg = tk.Frame(popup)
+        popup_frame_msg.place(relx=0.5, rely=0, relwidth=0.9, relheight=0.6, anchor='n')
+        lbl_popup = tk.Label(popup_frame_msg, text=msg, wraplength=230)
+        lbl_popup.place(relx=0.5, rely=0, relwidth=1, relheight=1, anchor='n')
+
+        popup_frame_btns = tk.Frame(popup)
+        popup_frame_btns.place(relx=0.5, rely=0.7, relwidth=0.9, relheight=0.3, anchor='n')
+        if yes_no == True:
+            btn_popup_yes = tk.Button(popup_frame_btns, text="Yes", command = popup.destroy)
+            btn_popup_yes.place(relx=0, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
+            btn_popup_no = tk.Button(popup_frame_btns, text="No", command = popup.destroy)
+            btn_popup_no.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
+        else:
+            btn_popup_okay = tk.Button(popup_frame_btns, text="OK", command = popup.destroy)
+            btn_popup_okay.place(relx=0.5, rely=0, relwidth=0.4, relheight=0.8, anchor='n')
+
         popup.mainloop()
-        
+
 
 if __name__ == '__main__':
     mainWindow = MainWindow()
