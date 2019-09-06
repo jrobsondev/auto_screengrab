@@ -151,31 +151,42 @@ class MainWindow:
             return last_file_number
         return None
 
-    def popup(self, title, msg, yes_no=False):
+class Popup:
+
+    def __init__(self, title, msg):
+        self.title = title
+        self.msg = msg
+
+    def setup_window(self):
+        self.popup.wm_title(self.title)
+        self.popup_canvas = tk.Canvas(self.popup, height='110', width='250')
+        self.popup_canvas.pack()
+        self.popup_frame_msg = tk.Frame(self.popup)
+        self.popup_frame_msg.place(relx=0.5, rely=0, relwidth=0.9, relheight=0.6, anchor='n')
+        self.lbl_popup = tk.Label(self.popup_frame_msg, text=self.msg, wraplength=230)
+        self.lbl_popup.place(relx=0.5, rely=0, relwidth=1, relheight=1, anchor='n')
+        self.popup_frame_btns = tk.Frame(self.popup)
+        self.popup_frame_btns.place(relx=0.5, rely=0.7, relwidth=0.9, relheight=0.3, anchor='n')
+
         # TODO: Disable all controls whilst popup is open
-        popup = tk.Tk()
-        popup.wm_title(title)
 
-        popup_canvas = tk.Canvas(popup, height='110', width='250')
-        popup_canvas.pack()
+    def yes_no(self):
+        # TODO: Add function parameters and pass them to the yes/no buttons
+        self.popup = tk.Tk()
+        self.setup_window()
+        self.btn_popup_yes = tk.Button(self.popup_frame_btns, text="Yes", command = self.popup.destroy)
+        self.btn_popup_yes.place(relx=0, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
+        self.btn_popup_no = tk.Button(self.popup_frame_btns, text="No", command = self.popup.destroy)
+        self.btn_popup_no.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
+        self.popup.mainloop()
 
-        popup_frame_msg = tk.Frame(popup)
-        popup_frame_msg.place(relx=0.5, rely=0, relwidth=0.9, relheight=0.6, anchor='n')
-        lbl_popup = tk.Label(popup_frame_msg, text=msg, wraplength=230)
-        lbl_popup.place(relx=0.5, rely=0, relwidth=1, relheight=1, anchor='n')
-
-        popup_frame_btns = tk.Frame(popup)
-        popup_frame_btns.place(relx=0.5, rely=0.7, relwidth=0.9, relheight=0.3, anchor='n')
-        if yes_no == True:
-            btn_popup_yes = tk.Button(popup_frame_btns, text="Yes", command = popup.destroy)
-            btn_popup_yes.place(relx=0, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
-            btn_popup_no = tk.Button(popup_frame_btns, text="No", command = popup.destroy)
-            btn_popup_no.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
-        else:
-            btn_popup_okay = tk.Button(popup_frame_btns, text="OK", command = popup.destroy)
-            btn_popup_okay.place(relx=0.5, rely=0, relwidth=0.4, relheight=0.8, anchor='n')
-
-        popup.mainloop()
+    
+    def okay(self):
+        self.popup = tk.Tk()
+        self.setup_window()
+        self.btn_popup_okay = tk.Button(self.popup_frame_btns, text="OK", command = self.popup.destroy)
+        self.btn_popup_okay.place(relx=0.5, rely=0, relwidth=0.4, relheight=0.8, anchor='n')
+        self.popup.mainloop()
 
 
 if __name__ == '__main__':
