@@ -79,13 +79,6 @@ class MainWindow:
         interval = int(self.entry_interval.get())
         self.running = True
         self.lbl_screenshots_taken.config(text='Screenshots taken: 0')
-        # ? Enable stop button
-        self.btn_stop.config(state='active')
-        # ? Disable start button, browse button, interval entry, project name
-        self.btn_start.config(state='disabled')
-        self.btn_folder_select.config(state='disabled')
-        self.entry_interval.config(state='readonly')
-        self.entry_project_name.config(state='readonly')
         # TODO: Start timer
         # ? Check folder for project files with the same name and set screenshots_taken variable
         # ! If this returns true it sets the screenshots taken to 1 more than there is - need to fix
@@ -93,12 +86,25 @@ class MainWindow:
         project_name = self.entry_project_name.get()
         tmp_screenshots_taken = self.check_folder_for_files(file_path, project_name)
         if tmp_screenshots_taken is not None:
-            self.screenshot_count = tmp_screenshots_taken
-            self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(self.screenshot_count)}')
+            warning_popup = Popup('Warning', 'A Project already exists with this name.\nWould you like to carry on with this project?')
+            warning_popup.yes_no()
+            if warning_popup.result == True:
+                self.screenshot_count = tmp_screenshots_taken
+                self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(self.screenshot_count)}')
+            else:
+                self.running = False
         # ? Take screenshot
-        self.take_screenshot(interval)
-        # ? Start updating screenshots taken
-        self.update_lbl_screenshots_taken(interval)
+        if self.running == True:
+            # ? Enable stop button
+            self.btn_stop.config(state='active')
+            # ? Disable start button, browse button, interval entry, project name
+            self.btn_start.config(state='disabled')
+            self.btn_folder_select.config(state='disabled')
+            self.entry_interval.config(state='readonly')
+            self.entry_project_name.config(state='readonly')
+            self.take_screenshot(interval)
+            # ? Start updating screenshots taken
+            self.update_lbl_screenshots_taken(interval)
 
     def btn_stop_pressed(self):
         # ? Disable stop button
@@ -156,6 +162,7 @@ class Popup:
     def __init__(self, title, msg):
         self.title = title
         self.msg = msg
+        self.result = True
 
     def setup_window(self):
         self.popup.wm_title(self.title)
@@ -174,11 +181,22 @@ class Popup:
         # TODO: Add function parameters and pass them to the yes/no buttons
         self.popup = tk.Tk()
         self.setup_window()
-        self.btn_popup_yes = tk.Button(self.popup_frame_btns, text="Yes", command = self.popup.destroy)
+        self.btn_popup_yes = tk.Button(self.popup_frame_btns, text="Yes", command=lambda:self.yes_no_result(1))
         self.btn_popup_yes.place(relx=0, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
-        self.btn_popup_no = tk.Button(self.popup_frame_btns, text="No", command = self.popup.destroy)
+        self.btn_popup_no = tk.Button(self.popup_frame_btns, text="No", command=lambda:self.yes_no_result(0))
         self.btn_popup_no.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
-        self.popup.mainloop()
+        self.popup.wait_window()
+
+    def yes_no_result(self, value):
+        if value == 1:
+            MainWindow.running = True
+            self.result = True
+            self.popup.destroy()
+        elif value == 0:
+            MainWindow.running = False
+            self.result = False
+            self.popup.destroy()
+        
 
     
     def okay(self):
