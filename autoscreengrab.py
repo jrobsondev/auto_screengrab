@@ -27,7 +27,7 @@ class MainWindow:
         self.frame_folder_select.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.2, anchor='n')
         self.lbl_folder_select = tk.Label(self.frame_folder_select, text='Save Location')
         self.lbl_folder_select.place(relx=0, rely=0, relwidth=0.25, relheight=0.25, anchor='nw')
-        self.entry_folder_select = tk.Entry(self.frame_folder_select, state="readonly")
+        self.entry_folder_select = tk.Entry(self.frame_folder_select, state='readonly')
         self.entry_folder_select.place(relx=0, rely=0.5, relwidth=0.7, relheight=0.5, anchor='w')
         self.btn_folder_select = tk.Button(self.frame_folder_select, text='browse',
                                            command=self.btn_folder_select_pressed)
@@ -76,35 +76,38 @@ class MainWindow:
         self.entry_folder_select.config(state='readonly')
 
     def btn_start_pressed(self):
-        interval = int(self.entry_interval.get())
-        self.running = True
-        self.lbl_screenshots_taken.config(text='Screenshots taken: 0')
-        # TODO: Start timer
-        # ? Check folder for project files with the same name and set screenshots_taken variable
-        # ! If this returns true it sets the screenshots taken to 1 more than there is - need to fix
-        file_path = self.entry_folder_select.get()
-        project_name = self.entry_project_name.get()
-        tmp_screenshots_taken = self.check_folder_for_files(file_path, project_name)
-        if tmp_screenshots_taken is not None:
-            warning_popup = Popup('Warning', 'A Project already exists with this name.\nWould you like to carry on with this project?')
-            warning_popup.yes_no()
-            if warning_popup.result:
-                self.screenshot_count = tmp_screenshots_taken
-                self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(self.screenshot_count)}')
-            else:
-                self.running = False
-        # ? Take screenshot
+        self.validate()
         if self.running:
-            # ? Enable stop button
-            self.btn_stop.config(state='active')
-            # ? Disable start button, browse button, interval entry, project name
-            self.btn_start.config(state='disabled')
-            self.btn_folder_select.config(state='disabled')
-            self.entry_interval.config(state='readonly')
-            self.entry_project_name.config(state='readonly')
-            self.take_screenshot(interval)
-            # ? Start updating screenshots taken
-            self.update_lbl_screenshots_taken(interval)
+            interval = int(self.entry_interval.get())
+            self.lbl_screenshots_taken.config(text='Screenshots taken: 0')
+            # TODO: Start timer
+            # ? Check folder for project files with the same name and set screenshots_taken variable
+            # ! If this returns true it sets the screenshots taken to 1 more than there is - need to fix
+            file_path = self.entry_folder_select.get()
+            project_name = self.entry_project_name.get()
+            tmp_screenshots_taken = self.check_folder_for_files(file_path, project_name)
+            if tmp_screenshots_taken is not None:
+                warning_popup = Popup('Warning',
+                                      'A Project already exists with this name.\n'
+                                      'Would you like to carry on with this project?')
+                warning_popup.yes_no()
+                if warning_popup.result:
+                    self.screenshot_count = tmp_screenshots_taken
+                    self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(self.screenshot_count)}')
+                else:
+                    self.running = False
+            # ? Take screenshot
+            if self.running:
+                # ? Enable stop button
+                self.btn_stop.config(state='active')
+                # ? Disable start button, browse button, interval entry, project name
+                self.btn_start.config(state='disabled')
+                self.btn_folder_select.config(state='disabled')
+                self.entry_interval.config(state='readonly')
+                self.entry_project_name.config(state='readonly')
+                self.take_screenshot(interval)
+                # ? Start updating screenshots taken
+                self.update_lbl_screenshots_taken(interval)
 
     def btn_stop_pressed(self):
         # ? Disable stop button
@@ -162,6 +165,21 @@ class MainWindow:
             return last_file_number
         return None
 
+    def validate(self):
+        entries = { self.entry_folder_select:'Folder Select',
+                    self.entry_project_name:'Project Name',
+                    self.entry_interval: 'Interval'}
+        for entry in entries:
+            entry_text = entry.get()
+            if not entry_text:
+                entry.config(bg='YELLOW')
+                error_popup = Popup('Error!', f'You have forgotten to complete the {entries.get(entry)} field.')
+                error_popup.okay()
+                self.running = False
+                return
+            entry.config(bg='WHITE')
+        self.running = True
+
 
 class Popup:
 
@@ -187,13 +205,13 @@ class Popup:
         # TODO: Add function parameters and pass them to the yes/no buttons
         self.popup = tk.Tk()
         self.setup_window()
-        self.btn_popup_yes = tk.Button(self.popup_frame_btns, text="Yes", command=lambda:self.yes_no_result(1))
+        self.btn_popup_yes = tk.Button(self.popup_frame_btns, text='Yes', command=lambda: self.popup_result(1))
         self.btn_popup_yes.place(relx=0, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
-        self.btn_popup_no = tk.Button(self.popup_frame_btns, text="No", command=lambda:self.yes_no_result(0))
+        self.btn_popup_no = tk.Button(self.popup_frame_btns, text='No', command=lambda: self.popup_result(0))
         self.btn_popup_no.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.8, anchor='w')
         self.popup.wait_window()
 
-    def yes_no_result(self, value):
+    def popup_result(self, value):
         if value == 1:
             MainWindow.running = True
             self.result = True
@@ -206,9 +224,9 @@ class Popup:
     def okay(self):
         self.popup = tk.Tk()
         self.setup_window()
-        self.btn_popup_okay = tk.Button(self.popup_frame_btns, text="OK", command = self.popup.destroy)
+        self.btn_popup_okay = tk.Button(self.popup_frame_btns, text='OK', command=self.popup.destroy)
         self.btn_popup_okay.place(relx=0.5, rely=0, relwidth=0.4, relheight=0.8, anchor='n')
-        self.popup.mainloop()
+        self.popup.wait_window()
 
 
 if __name__ == '__main__':
