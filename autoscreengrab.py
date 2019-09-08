@@ -12,12 +12,15 @@ class MainWindow:
     running = True
     callbacks = []
     screenshot_count = 0
+    is_resuming = False
+    # ? Constants
+    MILLI_TO_MINS = 6000
 
     def __init__(self):
         # ! PRESENTATION LAYER !#
         # ? Start root
         self.root = tk.Tk()
-
+        self.root.wm_title('Auto Screengrab')
         # ? Canvas
         self.canvas = tk.Canvas(self.root, height=self.HEIGHT, width=self.WIDTH)
         self.canvas.pack()
@@ -82,7 +85,6 @@ class MainWindow:
             self.lbl_screenshots_taken.config(text='Screenshots taken: 0')
             # TODO: Start timer
             # ? Check folder for project files with the same name and set screenshots_taken variable
-            # ! If this returns true it sets the screenshots taken to 1 more than there is - need to fix
             file_path = self.entry_folder_select.get()
             project_name = self.entry_project_name.get()
             tmp_screenshots_taken = self.check_folder_for_files(file_path, project_name)
@@ -92,6 +94,7 @@ class MainWindow:
                                       'Would you like to carry on with this project?')
                 warning_popup.yes_no()
                 if warning_popup.result:
+                    self.is_resuming = True
                     self.screenshot_count = tmp_screenshots_taken
                     self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(self.screenshot_count)}')
                 else:
@@ -132,13 +135,19 @@ class MainWindow:
 
     def update_lbl_screenshots_taken(self, interval):
         if self.running:
-            screenshots_taken = int(self.lbl_screenshots_taken.cget('text').split(':')[1].strip())
-            screenshots_taken = screenshots_taken + 1
-            # ! change interval multiplication back to *60000
-            self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(screenshots_taken)}')
-            self.callbacks.append(self.root.after(interval * 6000,
-                                                  lambda: self.update_lbl_screenshots_taken(
-                                                      int(self.entry_interval.get()))))
+            if not self.is_resuming:
+                screenshots_taken = int(self.lbl_screenshots_taken.cget('text').split(':')[1].strip())
+                screenshots_taken = screenshots_taken + 1
+                # ! change interval multiplication back to *60000
+                self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(screenshots_taken)}')
+                self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
+                                                      lambda: self.update_lbl_screenshots_taken(
+                                                          int(self.entry_interval.get()))))
+            else:
+                self.is_resuming = False
+                self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
+                                                      lambda: self.update_lbl_screenshots_taken(
+                                                          int(self.entry_interval.get()))))
 
     def take_screenshot(self, interval):
         if self.screenshot_count == 0:
@@ -150,7 +159,7 @@ class MainWindow:
             screen.save(os.path.join(file_path, file_name), format='png')
             self.screenshot_count += 1
             # ! change interval multiplication back to *60000
-            self.callbacks.append(self.root.after(interval * 6000,
+            self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
                                                   lambda: self.take_screenshot(int(self.entry_interval.get()))))
 
     @staticmethod
@@ -166,8 +175,8 @@ class MainWindow:
         return None
 
     def validate(self):
-        entries = { self.entry_folder_select:'Folder Select',
-                    self.entry_project_name:'Project Name',
+        entries = { self.entry_folder_select: 'Folder Select',
+                    self.entry_project_name: 'Project Name',
                     self.entry_interval: 'Interval'}
         for entry in entries:
             entry_text = entry.get()
