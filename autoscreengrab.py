@@ -88,13 +88,13 @@ class MainWindow:
         if tmp_screenshots_taken is not None:
             warning_popup = Popup('Warning', 'A Project already exists with this name.\nWould you like to carry on with this project?')
             warning_popup.yes_no()
-            if warning_popup.result == True:
+            if warning_popup.result:
                 self.screenshot_count = tmp_screenshots_taken
                 self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(self.screenshot_count)}')
             else:
                 self.running = False
         # ? Take screenshot
-        if self.running == True:
+        if self.running:
             # ? Enable stop button
             self.btn_stop.config(state='active')
             # ? Disable start button, browse button, interval entry, project name
@@ -114,13 +114,18 @@ class MainWindow:
         self.btn_folder_select.config(state='active')
         self.entry_interval.config(state='normal')
         self.entry_project_name.config(state='normal')
-        # TODO: open popup window prompting to open screenshot folder
         # ? Stop updating screenshots taken
         self.running = False
         for callback in self.callbacks:
             self.root.after_cancel(callback)
         # ? Reset screenshot count back to 1
         self.screenshot_count = 1
+        # ? open popup window prompting to open screenshot folder
+        warning_popup = Popup('Warning', 'Would you like to to view the screenshots taken for this project?')
+        warning_popup.yes_no()
+        if warning_popup.result:
+            path_to_open = os.path.realpath(self.entry_folder_select.get())
+            os.startfile(path_to_open)
 
     def update_lbl_screenshots_taken(self, interval):
         if self.running:
@@ -156,6 +161,7 @@ class MainWindow:
             last_file_number = int(last_file_number.split('.')[0]) + 1
             return last_file_number
         return None
+
 
 class Popup:
 
@@ -196,9 +202,7 @@ class Popup:
             MainWindow.running = False
             self.result = False
             self.popup.destroy()
-        
 
-    
     def okay(self):
         self.popup = tk.Tk()
         self.setup_window()
