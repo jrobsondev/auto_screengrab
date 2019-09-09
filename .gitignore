@@ -1,6 +1,5 @@
 #CUSTOM
 .vscode
-*.png
 .idea
 build
 dist

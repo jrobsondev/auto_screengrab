@@ -53,11 +53,25 @@ class MainWindow:
 
         # ? Info section
         self.frame_info = tk.Frame(self.root)
-        self.frame_info.place(relx=0.5, rely=0.6, relwidth=0.9, relheight=0.1, anchor='n')
-        self.lbl_screenshots_taken = tk.Label(self.frame_info, text=f'Screenshots taken: 0')
-        self.lbl_screenshots_taken.place(relx=0.5, rely=0, relwidth=0.8, relheight=0.45, anchor='n')
+        self.frame_info.place(relx=0.5, rely=0.6, relwidth=0.9, relheight=0.2, anchor='n')
+        self.lbl_screenshots_taken = tk.Label(self.frame_info, text='Screenshots taken: 0')
+        self.lbl_screenshots_taken.place(relx=0, rely=0.2, relwidth=0.5, relheight=0.45, anchor='w')
         self.lbl_time_running = tk.Label(self.frame_info, text=f'Time Running: ')
-        self.lbl_time_running.place(relx=0.5, rely=0.5, relwidth=0.8, relheight=0.5, anchor='n')
+        self.lbl_time_running.place(relx=0, rely=0.5, relwidth=0.5, relheight=0.5, anchor='w')
+
+        # ? Screen selection
+        self.screen_dict = {}
+        self.screens = self.get_screens()
+        self.selected_screen = tk.StringVar(self.root)
+        self.selected_screen.set(self.screens.get(0))
+        self.lbl_screens = tk.Label(self.frame_info, text='Select screen')
+        self.lbl_screens.place(relx=0.6, rely=0.1, relwidth=0.4, relheight=0.3, anchor='w')
+        self.dropdown_screens = tk.OptionMenu(self.frame_info, self.selected_screen, *self.screens.values())
+        self.dropdown_screens.place(relx=0.6, rely=0.5, relwidth=0.4, relheight=0.5, anchor='w')
+        caret = tk.PhotoImage(file='icons\\caret-down.png')
+        self.dropdown_screens.config(indicatoron=0)
+        self.lbl_caret = tk.Label(self.dropdown_screens, image=caret)
+        self.lbl_caret.place(relx=0.8, rely=0, relwidth=0.2, relheight=1)
 
         # ? Start/Stop buttons
         self.frame_start_stop = tk.Frame(self.root)
@@ -106,9 +120,13 @@ class MainWindow:
                 # ? Disable start button, browse button, interval entry, project name
                 self.btn_start.config(state='disabled')
                 self.btn_folder_select.config(state='disabled')
+                self.dropdown_screens.config(state='disabled')
                 self.entry_interval.config(state='readonly')
                 self.entry_project_name.config(state='readonly')
-                self.take_screenshot(interval)
+                for key, value in self.screen_dict.items():
+                    if self.selected_screen.get() == value:
+                        screen_index = key
+                self.take_screenshot(interval, screen_index)
                 # ? Start updating screenshots taken
                 self.update_lbl_screenshots_taken(interval)
 
@@ -118,6 +136,7 @@ class MainWindow:
         # ? Enable start button, browse button, interval entry, project name
         self.btn_start.config(state='active')
         self.btn_folder_select.config(state='active')
+        self.dropdown_screens.config(state='active')
         self.entry_interval.config(state='normal')
         self.entry_project_name.config(state='normal')
         # ? Stop updating screenshots taken
@@ -149,18 +168,19 @@ class MainWindow:
                                                       lambda: self.update_lbl_screenshots_taken(
                                                           int(self.entry_interval.get()))))
 
-    def take_screenshot(self, interval):
+    def take_screenshot(self, interval, screen_index):
         if self.screenshot_count == 0:
             self.screenshot_count = 1
         if self.running:
-            screen = getRectAsImage(getDisplayRects()[0])
+            screen = getRectAsImage(getDisplayRects()[screen_index])
             file_path = self.entry_folder_select.get()
             file_name = self.entry_project_name.get() + '_' + str(self.screenshot_count) + '.png'
             screen.save(os.path.join(file_path, file_name), format='png')
             self.screenshot_count += 1
             # ! change interval multiplication back to *60000
             self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
-                                                  lambda: self.take_screenshot(int(self.entry_interval.get()))))
+                                                  lambda: self.take_screenshot(int(self.entry_interval.get()),
+                                                                               screen_index)))
 
     @staticmethod
     def check_folder_for_files(folder_path, project_name):
@@ -188,6 +208,11 @@ class MainWindow:
                 return
             entry.config(bg='WHITE')
         self.running = True
+
+    def get_screens(self):
+        for index, screen in enumerate(getDisplayRects()):
+            self.screen_dict[index] = f'Screen {str(index + 1)}'
+        return self.screen_dict
 
 
 class Popup:
