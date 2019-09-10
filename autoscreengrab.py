@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-from desktopmagic.screengrab_win32 import getDisplayRects, getRectAsImage
+from desktopmagic.screengrab_win32 import getDisplayRects, getRectAsImage, getScreenAsImage, getDisplaysAsImages
 import os
 import glob
 
@@ -60,7 +60,7 @@ class MainWindow:
         self.lbl_time_running.place(relx=0, rely=0.5, relwidth=0.5, relheight=0.5, anchor='w')
 
         # ? Screen selection
-        self.screen_dict = {}
+        self.screen_dict = {3: 'Both screens', 4: 'Both screens (separate)'}
         self.screens = self.get_screens()
         self.selected_screen = tk.StringVar(self.root)
         self.selected_screen.set(self.screens.get(0))
@@ -172,15 +172,32 @@ class MainWindow:
         if self.screenshot_count == 0:
             self.screenshot_count = 1
         if self.running:
-            screen = getRectAsImage(getDisplayRects()[screen_index])
             file_path = self.entry_folder_select.get()
             file_name = self.entry_project_name.get() + '_' + str(self.screenshot_count) + '.png'
-            screen.save(os.path.join(file_path, file_name), format='png')
-            self.screenshot_count += 1
-            # ! change interval multiplication back to *60000
-            self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
-                                                  lambda: self.take_screenshot(int(self.entry_interval.get()),
-                                                                               screen_index)))
+            if self.selected_screen.get() == 'Screen 1' or self.selected_screen.get() == 'Screen 2':
+                screen = getRectAsImage(getDisplayRects()[screen_index])
+                screen.save(os.path.join(file_path, file_name), format='png')
+                self.screenshot_count += 1
+                # ! change interval multiplication back to *60000
+                self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
+                                                      lambda: self.take_screenshot(int(self.entry_interval.get()),
+                                                                                   screen_index)))
+            elif self.selected_screen.get() == 'Both screens':
+                entire_screen = getScreenAsImage()
+                entire_screen.save(os.path.join(file_path, file_name), format='png')
+                self.screenshot_count += 1
+                self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
+                                                      lambda: self.take_screenshot(int(self.entry_interval.get()),
+                                                                                   screen_index)))
+            elif self.selected_screen.get() == 'Both screens (separate)':
+                for screen_number, image in enumerate(getDisplaysAsImages(), 1):
+                    file_name = self.entry_project_name.get() + '_' + str(self.screenshot_count)\
+                                + '_screen' + str(screen_number) + '.png'
+                    image.save(os.path.join(file_path, file_name), format='png')
+                self.screenshot_count += 1
+                self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
+                                                      lambda: self.take_screenshot(int(self.entry_interval.get()),
+                                                                                   screen_index)))
 
     @staticmethod
     def check_folder_for_files(folder_path, project_name):
