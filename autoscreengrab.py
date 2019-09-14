@@ -1,3 +1,4 @@
+import time
 import tkinter as tk
 from tkinter import filedialog
 from desktopmagic.screengrab_win32 import getDisplayRects, getRectAsImage, getScreenAsImage, getDisplaysAsImages
@@ -6,21 +7,24 @@ import glob
 
 
 class MainWindow:
-    # ? Variables
-    HEIGHT = 300
-    WIDTH = 400
-    running = True
-    callbacks = []
-    screenshot_count = 0
-    is_resuming = False
-    # ? Constants
-    MILLI_TO_MINS = 6000
-
     def __init__(self):
-        # ! PRESENTATION LAYER !#
         # ? Start root
         self.root = tk.Tk()
         self.root.wm_title('Auto Screengrab')
+        # ? Variables
+        self.HEIGHT = 300
+        self.WIDTH = 400
+        self.running = True
+        self.callbacks = []
+        self.screenshot_count = 0
+        self.is_resuming = False
+        self.timestr = tk.StringVar()
+        self.timer_start = 0.0
+        self.timer_elapsedtime = 0.0
+        # ? Constants
+        self.MILLI_TO_MINS = 60000
+
+        # ! PRESENTATION LAYER !#
         # ? Canvas
         self.canvas = tk.Canvas(self.root, height=self.HEIGHT, width=self.WIDTH)
         self.canvas.pack()
@@ -56,8 +60,9 @@ class MainWindow:
         self.frame_info.place(relx=0.5, rely=0.6, relwidth=0.9, relheight=0.2, anchor='n')
         self.lbl_screenshots_taken = tk.Label(self.frame_info, text='Screenshots taken: 0')
         self.lbl_screenshots_taken.place(relx=0, rely=0.2, relwidth=0.5, relheight=0.45, anchor='w')
-        self.lbl_time_running = tk.Label(self.frame_info, text=f'Time Running: ')
+        self.lbl_time_running = tk.Label(self.frame_info, textvariable=self.timestr)
         self.lbl_time_running.place(relx=0, rely=0.5, relwidth=0.5, relheight=0.5, anchor='w')
+        self.timer_set_time(self.timer_elapsedtime)
 
         # ? Screen selection
         self.screen_dict = {3: 'Both screens', 4: 'Both screens (separate)'}
@@ -113,7 +118,6 @@ class MainWindow:
                     self.lbl_screenshots_taken.config(text=f'Screenshots taken: {str(self.screenshot_count)}')
                 else:
                     self.running = False
-            # ? Take screenshot
             if self.running:
                 # ? Enable stop button
                 self.btn_stop.config(state='active')
@@ -126,6 +130,11 @@ class MainWindow:
                 for key, value in self.screen_dict.items():
                     if self.selected_screen.get() == value:
                         screen_index = key
+                # ? Start timer
+                self.timer_elapsedtime = 0.0
+                self.timer_start = time.time() - self.timer_elapsedtime
+                self.timer_update()
+                # ? Take screenshot
                 self.take_screenshot(interval, screen_index)
                 # ? Start updating screenshots taken
                 self.update_lbl_screenshots_taken(interval)
@@ -141,6 +150,9 @@ class MainWindow:
         self.entry_project_name.config(state='normal')
         # ? Stop updating screenshots taken
         self.running = False
+        # ? Reset timer
+        self.timer_elapsedtime = time.time() - self.timer_start
+        self.timer_set_time(self.timer_elapsedtime)
         for callback in self.callbacks:
             self.root.after_cancel(callback)
         # ? Reset screenshot count back to 1
@@ -230,6 +242,16 @@ class MainWindow:
         for index, screen in enumerate(getDisplayRects()):
             self.screen_dict[index] = f'Screen {str(index + 1)}'
         return self.screen_dict
+
+    def timer_set_time(self, elap):
+        hours, rem = divmod(elap, 3600)
+        minutes, seconds = divmod(rem, 60)
+        self.timestr.set('Time Running: {:0>2}:{:0>2}:{:0>2}'.format(int(hours), int(minutes), int(seconds)))
+
+    def timer_update(self):
+        self.timer_elapsedtime = time.time() - self.timer_start
+        self.timer_set_time(self.timer_elapsedtime)
+        self.callbacks.append(self.root.after(50, self.timer_update))
 
 
 class Popup:
