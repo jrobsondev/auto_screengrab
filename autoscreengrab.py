@@ -214,7 +214,7 @@ class MainWindow:
     @staticmethod
     def check_folder_for_files(folder_path, project_name):
         list_dir = os.listdir(folder_path)
-        list_dir = [file.lower() for file in glob.glob(f'{os.path.join(folder_path, project_name)}*.png')]
+        list_dir = [file.lower() for file in glob.glob(f'{os.path.join(folder_path, project_name)}_*.png')]
         if len(list_dir) != 0:
             list_dir.sort(key=lambda x: os.path.getctime(x))
             last_file = list_dir[-1]
