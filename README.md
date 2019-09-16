@@ -8,7 +8,9 @@ I created Auto Screengrab as a tool for my wife to use to take progress pictures
 
 ## How to install
 
-Auto Screengrab does not require installation as it is a standalone executable. To use, simply run the .exe found in the [insert folder name here] folder.
+Auto Screengrab does not require installation as it is a standalone executable. To use, simply run the .exe found in the dist folder.
+
+Please note that the autoscreengrab.exe must be run in a location containing the 'icons' folder.
 
 ## How to use
 
