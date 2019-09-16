@@ -11,6 +11,7 @@ class MainWindow:
         # ? Start root
         self.root = tk.Tk()
         self.root.wm_title('Auto Screengrab')
+        self.root.iconbitmap('icons\\app_logo.ico')
         # ? Variables
         self.HEIGHT = 300
         self.WIDTH = 400
@@ -65,7 +66,7 @@ class MainWindow:
         self.timer_set_time(self.timer_elapsedtime)
 
         # ? Screen selection
-        self.screen_dict = {3: 'Both screens', 4: 'Both screens (separate)'}
+        self.screen_dict = {3: 'All screens', 4: 'All screens (separate)'}
         self.screens = self.get_screens()
         self.selected_screen = tk.StringVar(self.root)
         self.selected_screen.set(self.screens.get(0))
@@ -194,14 +195,14 @@ class MainWindow:
                 self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
                                                       lambda: self.take_screenshot(int(self.entry_interval.get()),
                                                                                    screen_index)))
-            elif self.selected_screen.get() == 'Both screens':
+            elif self.selected_screen.get() == 'All screens':
                 entire_screen = getScreenAsImage()
                 entire_screen.save(os.path.join(file_path, file_name), format='png')
                 self.screenshot_count += 1
                 self.callbacks.append(self.root.after(interval * self.MILLI_TO_MINS,
                                                       lambda: self.take_screenshot(int(self.entry_interval.get()),
                                                                                    screen_index)))
-            elif self.selected_screen.get() == 'Both screens (separate)':
+            elif self.selected_screen.get() == 'All screens (separate)':
                 for screen_number, image in enumerate(getDisplaysAsImages(), 1):
                     file_name = self.entry_project_name.get() + '_' + str(self.screenshot_count)\
                                 + '_screen' + str(screen_number) + '.png'
@@ -229,6 +230,7 @@ class MainWindow:
                     self.entry_interval: 'Interval'}
         for entry in entries:
             entry_text = entry.get()
+            # ? Make sure that all entries have a value.
             if not entry_text:
                 entry.config(bg='YELLOW')
                 error_popup = Popup('Error!', f'You have forgotten to complete the {entries.get(entry)} field.')
@@ -236,6 +238,13 @@ class MainWindow:
                 self.running = False
                 return
             entry.config(bg='WHITE')
+        # ? Make sure that interval is an integer, not a string.
+        if not self.entry_interval.get().isdigit():
+            self.entry_interval.config(bg='YELLOW')
+            error_popup = Popup('Error!', 'Please enter a numeric value for interval')
+            error_popup.okay()
+            self.running = False
+            return
         self.running = True
 
     def get_screens(self):
